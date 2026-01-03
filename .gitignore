@@ -1,0 +1,40 @@
+# Node dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+/dist/
+/build/
+**/dist/
+**/build/
+coverage/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Environment / secrets
+.env
+.env.*
+backend/.env
+frontend/.env
+
+# Editor / OS cruft
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Large local Gutenberg-style data (do not push to GitHub)
+# Keep this data only on your machine; seed script can recreate DB from it.
+test/books/
+test/books_meta/
+
+# One-off local helper scripts not needed on GitHub
+injectBooksViaApi.mjs
+
+# Misc
+*.tmp
+postman/
