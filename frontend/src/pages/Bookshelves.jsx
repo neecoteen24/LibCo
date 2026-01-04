@@ -66,10 +66,10 @@ function Bookshelves() {
 
         <div className="row g-4">
           <div className="col-12 col-md-3">
-            <div className="list-group small">
-              {loadingShelves && <div className="list-group-item bg-dark text-light">Loading shelves…</div>}
+            <div className="list-group small shelf-filter-list glass-panel-soft">
+              {loadingShelves && <div className="list-group-item text-light">Loading shelves…</div>}
               {!loadingShelves && shelves.length === 0 && (
-                <div className="list-group-item bg-dark text-light">No bookshelves found.</div>
+                <div className="list-group-item text-light">No bookshelves found.</div>
               )}
               {!loadingShelves &&
                 shelves.map((shelf) => (

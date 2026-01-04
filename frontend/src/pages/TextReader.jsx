@@ -9,6 +9,7 @@ function TextReader() {
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [presetKey, setPresetKey] = useState('classic');
 
   useEffect(() => {
     async function fetchText() {
@@ -30,8 +31,34 @@ function TextReader() {
     fetchText();
   }, [id]);
 
+  const presets = {
+    classic: {
+      label: 'Classic serif',
+      fontFamily: '"Georgia", "Times New Roman", serif',
+      backgroundColor: '#f4e7d0',
+      textColor: '#3b2a1a',
+    },
+    typewriter: {
+      label: 'Typewriter',
+      fontFamily: '"Courier New", "Courier Prime", monospace',
+      backgroundColor: '#f2e3c4',
+      textColor: '#3a2b1a',
+    },
+    nightSepia: {
+      label: 'Night sepia',
+      fontFamily: '"Palatino Linotype", "Book Antiqua", serif',
+      backgroundColor: '#23170f',
+      textColor: '#f6ead4',
+    },
+  };
+
+  const currentPreset = presets[presetKey] || presets.classic;
+
   return (
-    <main className="flex-grow-1" style={{ backgroundColor: '#050608' }}>
+    <main
+      className="flex-grow-1"
+      style={{ background: 'radial-gradient(circle at top, #14151d 0, #050608 55%)' }}
+    >
       <div className="container-fluid py-3 border-bottom bg-dark text-light">
         <div className="d-flex justify-content-between align-items-center">
           <button
@@ -48,19 +75,47 @@ function TextReader() {
         {loading && <p className="text-light">Loading text…</p>}
         {error && !loading && <p className="text-danger">{error}</p>}
         {!loading && !error && (
-          <div
-            className="p-4 bg-white shadow-sm rounded"
-            style={{
-              maxWidth: '48rem',
-              margin: '0 auto',
-              lineHeight: 1.7,
-              fontSize: '1.08rem',
-              whiteSpace: 'pre-wrap',
-              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-            }}
-          >
-            {content}
-          </div>
+          <>
+            <div
+              className="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2"
+              style={{ maxWidth: '48rem', margin: '0 auto' }}
+            >
+              <span className="small text-muted">Vintage reader</span>
+              <div className="btn-group btn-group-sm" role="group" aria-label="Reader style">
+                {Object.entries(presets).map(([key, preset]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={
+                      'btn ' +
+                      (presetKey === key ? 'btn-warning' : 'btn-outline-secondary')
+                    }
+                    onClick={() => setPresetKey(key)}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div
+              className="p-4 shadow rounded"
+              style={{
+                maxWidth: '48rem',
+                margin: '0 auto',
+                lineHeight: 1.7,
+                fontSize: '1.08rem',
+                whiteSpace: 'pre-wrap',
+                fontFamily: currentPreset.fontFamily,
+                backgroundColor: currentPreset.backgroundColor,
+                color: currentPreset.textColor,
+                boxShadow:
+                  '0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.35)',
+              }}
+            >
+              {content}
+            </div>
+          </>
         )}
       </div>
     </main>

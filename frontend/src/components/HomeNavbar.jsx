@@ -59,7 +59,7 @@ function HomeNavbar({ onSearchSubmit, initialQuery = '' }) {
     navigate(`/books/${book.gutenberg_id || book._id}`);
   };
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark" style={{ backgroundColor: '#050608' }}>
+    <nav className="navbar navbar-expand-lg navbar-dark glass-bar sticky-top">
       <div className="container">
         <Link className="navbar-brand fw-semibold" to="/">
           LibraryCo
@@ -115,7 +115,7 @@ function HomeNavbar({ onSearchSubmit, initialQuery = '' }) {
                 onBlur={() => setTimeout(() => setIsFocused(false), 150)}
               />
               {isFocused && suggestions.length > 0 && (
-                <div className="position-absolute top-100 start-0 w-100 bg-white shadow-sm rounded mt-1" style={{ zIndex: 1050 }}>
+                <div className="position-absolute top-100 start-0 w-100 nav-suggestions shadow-sm rounded mt-1" style={{ zIndex: 1050 }}>
                   <ul className="list-group list-group-flush small mb-0">
                     {suggestions.map((book) => (
                       <button
