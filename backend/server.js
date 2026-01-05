@@ -6,6 +6,8 @@ import helmet from 'helmet';
 import path from 'path';
 import { connectDB } from './config/db.js';
 import booksRouter from './routes/books.js';
+import authRouter from './routes/auth.js';
+import userProgressRouter from './routes/userProgress.js';
 import errorHandler from './middlewares/errorHandler.js';
 
 const app = express();
@@ -22,6 +24,8 @@ app.use('/content', express.static(contentRoot));
 
 // API routes
 app.use('/api/books', booksRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/users/me/progress', userProgressRouter);
 
 // Error handler (last)
 app.use(errorHandler);

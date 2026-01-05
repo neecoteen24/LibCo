@@ -126,32 +126,32 @@ function BookDetails() {
               About this eBook
             </p>
 
-            <div className="card shadow-sm mb-4 border-0">
+            <div className="card glass-panel shadow-sm mb-4 border-0">
               <div className="card-body">
                 <dl className="row mb-0" style={{ fontSize: '0.98rem' }}>
                   <dt className="col-sm-4 text-muted">Author</dt>
-                  <dd className="col-sm-8">{authors || 'Unknown author'}</dd>
+                  <dd className="col-sm-8 text-muted">{authors || 'Unknown author'}</dd>
 
                   <dt className="col-sm-4 text-muted">Title</dt>
-                  <dd className="col-sm-8">{data.title}</dd>
+                  <dd className="col-sm-8 text-muted">{data.title}</dd>
 
                   <dt className="col-sm-4 text-muted">Language</dt>
-                  <dd className="col-sm-8">{languageLabel}</dd>
+                  <dd className="col-sm-8 text-muted">{languageLabel}</dd>
 
                   <dt className="col-sm-4 text-muted">Category</dt>
-                  <dd className="col-sm-8">{data.media_type || 'Text'}</dd>
+                  <dd className="col-sm-8 text-muted">{data.media_type || 'Text'}</dd>
 
                   <dt className="col-sm-4 text-muted">EBook-No.</dt>
-                  <dd className="col-sm-8">{book.gutenberg_id}</dd>
+                  <dd className="col-sm-8 text-muted">{book.gutenberg_id}</dd>
 
                   <dt className="col-sm-4 text-muted">Downloads</dt>
-                  <dd className="col-sm-8">{downloadLabel}</dd>
+                  <dd className="col-sm-8 text-muted">{downloadLabel}</dd>
                 </dl>
               </div>
             </div>
 
-            <div className="card shadow-sm mb-4 border-0">
-              <div className="card-header bg-white pb-1 border-0">
+            <div className="card glass-panel shadow-sm mb-4 border-0">
+              <div className="card-header pb-1 border-0">
                 <h2 className="h6 mb-1">Read or download for free</h2>
                 <p className="text-muted mb-0" style={{ fontSize: '0.95rem' }}>
                   Choose a reader to open this eBook.
@@ -236,11 +236,11 @@ function BookDetails() {
 
       {showSynopsis && (
         <>
-          <div className="modal fade show d-block" tabIndex="-1" role="dialog">
+          <div className="modal fade show d-block synopsis-modal" tabIndex="-1" role="dialog">
             <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">Synopsis</h5>
+                  <h5 className="modal-title">Letter from the archives</h5>
                   <button
                     type="button"
                     className="btn-close"
@@ -249,7 +249,10 @@ function BookDetails() {
                   ></button>
                 </div>
                 <div className="modal-body">
-                  <p className="mb-0" style={{ whiteSpace: 'pre-wrap', fontSize: '0.98rem' }}>
+                  <p
+                    className="mb-0"
+                    style={{ whiteSpace: 'pre-wrap' }}
+                  >
                     {summary}
                   </p>
                 </div>
@@ -265,7 +268,7 @@ function BookDetails() {
               </div>
             </div>
           </div>
-          <div className="modal-backdrop fade show"></div>
+          <div className="modal-backdrop fade show synopsis-backdrop"></div>
         </>
       )}
     </main>

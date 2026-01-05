@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -10,6 +11,7 @@ function TextReader() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [presetKey, setPresetKey] = useState('classic');
+  const { token } = useAuth();
 
   useEffect(() => {
     async function fetchText() {
@@ -30,6 +32,66 @@ function TextReader() {
 
     fetchText();
   }, [id]);
+
+  // Fetch existing reading progress when logged in (best-effort, non-blocking)
+  useEffect(() => {
+    if (!token) return;
+
+    const controller = new AbortController();
+
+    const loadProgress = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/users/me/progress/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
+        });
+        if (!res.ok) return;
+        const json = await res.json();
+        const p = json.progress;
+        if (!p) return;
+        // Currently just log; can later use to restore scroll position, etc.
+        console.debug('Loaded reading progress for book', id, p);
+      } catch {
+        // ignore
+      }
+    };
+
+    loadProgress();
+    return () => controller.abort();
+  }, [id, token]);
+
+  // Periodically save reading progress when logged in
+  useEffect(() => {
+    if (!token) return;
+    if (!content) return;
+
+    const saveProgress = async () => {
+      try {
+        await fetch(`${API_URL}/api/users/me/progress/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            status: 'in_progress',
+            // Without a structured reader, we can approximate progress as 0 for now
+            // This still records visits and genre stats.
+            progressPercent: 0,
+            filePath: 'book.txt',
+          }),
+        });
+      } catch {
+        // ignore transient errors
+      }
+    };
+
+    const interval = window.setInterval(saveProgress, 30000);
+    // Also save once when content first loads
+    saveProgress();
+
+    return () => window.clearInterval(interval);
+  }, [id, token, content]);
 
   const presets = {
     classic: {

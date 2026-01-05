@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext.jsx'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -9,11 +10,36 @@ function HomeNavbar({ onSearchSubmit, initialQuery = '' }) {
   const [isFocused, setIsFocused] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
 
   // Keep local query in sync if parent changes
   useEffect(() => {
     setQuery(initialQuery);
   }, [initialQuery]);
+
+  // Close profile dropdown on route change or outside click
+  useEffect(() => {
+    setProfileOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!profileRef.current) return;
+      if (!profileRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    };
+
+    if (profileOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [profileOpen]);
 
   // Fetch lightweight suggestions as user types
   useEffect(() => {
@@ -102,6 +128,73 @@ function HomeNavbar({ onSearchSubmit, initialQuery = '' }) {
               </a>
             </li>
           </ul>
+          <div className="d-flex align-items-center ms-lg-3 mb-3 mb-lg-0 position-relative">
+            {user ? (
+              <>
+                <div ref={profileRef} className="nav-profile-wrapper d-flex align-items-center position-relative">
+                  <button
+                    type="button"
+                    className="nav-profile-toggle btn btn-sm d-flex align-items-center"
+                    onClick={() => setProfileOpen((open) => !open)}
+                  >
+                    <span className="nav-profile-avatar me-2">
+                      {(user.displayName || user.email || '?').trim()[0]?.toUpperCase() || '?'}
+                    </span>
+                    <span className="nav-profile-name text-truncate">
+                      {user.displayName || user.email}
+                    </span>
+                    <i className={`bi ms-2 small ${profileOpen ? 'bi-chevron-up' : 'bi-chevron-down'}`}></i>
+                  </button>
+                  {profileOpen && (
+                    <div className="nav-profile-menu">
+                    <button
+                      type="button"
+                      className="nav-profile-item"
+                      onClick={() => {
+                        setProfileOpen(false);
+                        navigate('/profile');
+                      }}
+                    >
+                      <i className="bi bi-person me-2"></i>
+                      Your profile
+                    </button>
+                    <button
+                      type="button"
+                      className="nav-profile-item"
+                      onClick={() => {
+                        setProfileOpen(false);
+                        navigate('/history');
+                      }}
+                    >
+                      <i className="bi bi-clock-history me-2"></i>
+                      History
+                    </button>
+                    <button
+                      type="button"
+                      className="nav-profile-item nav-profile-item--danger"
+                      onClick={() => {
+                        setProfileOpen(false);
+                        logout();
+                      }}
+                    >
+                      <i className="bi bi-box-arrow-right me-2"></i>
+                      Sign out
+                    </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="btn btn-outline-light btn-sm me-2">
+                  Sign in
+                </Link>
+                <Link to="/register" className="btn btn-warning btn-sm">
+                  Join free
+                </Link>
+              </>
+            )}
+          </div>
           <form className="d-flex ms-lg-3 mt-3 mt-lg-0 position-relative" role="search" onSubmit={handleSubmit}>
             <div className="flex-grow-1 position-relative">
               <input

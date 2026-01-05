@@ -110,7 +110,16 @@ function Home({ searchTerm }) {
           throw new Error(`Failed to fetch books: ${res.status}`);
         }
         const json = await res.json();
-        setBooks(json.data || []);
+        const data = json.data || [];
+        setBooks(data);
+
+        // For the home (no search) view, cache this list for the session
+        if (!searchTerm && typeof window !== 'undefined' && window.sessionStorage) {
+          window.sessionStorage.setItem(
+            'libraryco-home-books-v1',
+            JSON.stringify(data),
+          );
+        }
       } catch (err) {
         console.error(err);
         setError('Could not load books.');
@@ -119,6 +128,33 @@ function Home({ searchTerm }) {
       }
     }
 
+    // With a search term, always fetch fresh results
+    if (searchTerm) {
+      setLoading(true);
+      setError(null);
+      fetchBooks();
+      return;
+    }
+
+    // No search term: try to use a per-session cached list first
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      const cached = window.sessionStorage.getItem('libraryco-home-books-v1');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setBooks(parsed);
+            setLoading(false);
+            return; // skip network fetch this session
+          }
+        } catch {
+          // ignore bad cache and fall back to network
+        }
+      }
+    }
+
+    setLoading(true);
+    setError(null);
     fetchBooks();
   }, [searchTerm]);
 
