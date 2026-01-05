@@ -84,9 +84,21 @@ export async function listBooks(req, res, next) {
     const { q, page = 1, limit = 20, random, bookshelf, genre } = req.query;
 
     const filter = {};
+    let searchOr = null;
+    let genreOr = null;
+
     if (q) {
-      filter['data.title'] = { $regex: q, $options: 'i' };
+      const trimmed = String(q).trim();
+      const regex = { $regex: trimmed, $options: 'i' };
+      searchOr = [{ 'data.title': regex }];
+
+      const asNumber = Number(trimmed);
+      if (Number.isInteger(asNumber) && asNumber > 0) {
+        // Allow searching directly by Gutenberg ID, e.g. "1342"
+        searchOr.push({ gutenberg_id: asNumber });
+      }
     }
+
     if (bookshelf) {
       filter['data.bookshelves'] = bookshelf;
     }
@@ -96,33 +108,42 @@ export async function listBooks(req, res, next) {
       const rule = GENRE_RULES.find((r) => r.name === genre);
       if (rule) {
         const regexes = rule.keywords.map((kw) => new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
-        filter.$or = [
+        genreOr = [
           { 'data.bookshelves': { $in: regexes } },
           { 'data.subjects': { $in: regexes } },
         ];
       }
     }
 
+    let queryFilter = { ...filter };
+    if (searchOr && genreOr) {
+      queryFilter.$and = [{ $or: searchOr }, { $or: genreOr }];
+    } else if (searchOr) {
+      queryFilter.$or = searchOr;
+    } else if (genreOr) {
+      queryFilter.$or = genreOr;
+    }
+
     // If random=true, return a random sample of books (respecting filters)
     if (random === 'true') {
       const size = Number(limit) || 20;
       const pipeline = [
-        { $match: filter },
+        { $match: queryFilter },
         { $sample: { size } },
       ];
-      const books = await Book.aggregate(pipeline);
-      const total = await Book.countDocuments(filter);
+      const  books = await Book.aggregate(pipeline);
+      const total = await Book.countDocuments(queryFilter);
       return res.json({ data: books, page: 1, limit: size, total });
     }
 
     const numericPage = Number(page) || 1;
     const numericLimit = Number(limit) || 20;
 
-    const books = await Book.find(filter)
+    const books = await Book.find(queryFilter)
       .skip((numericPage - 1) * numericLimit)
       .limit(numericLimit)
       .sort({ 'data.title': 1 });
-    const total = await Book.countDocuments(filter);
+    const total = await Book.countDocuments(queryFilter);
     res.json({ data: books, page: numericPage, limit: numericLimit, total });
   } catch (err) { next(err); }
 }

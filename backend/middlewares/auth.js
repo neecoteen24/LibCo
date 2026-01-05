@@ -16,6 +16,7 @@ export default function auth(req, res, next) {
     const payload = jwt.verify(token, secret);
     req.userId = payload.sub;
     req.userEmail = payload.email;
+    req.userRole = payload.role;
     next();
   } catch (err) {
     console.error(err);

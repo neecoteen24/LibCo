@@ -8,6 +8,8 @@ import { connectDB } from './config/db.js';
 import booksRouter from './routes/books.js';
 import authRouter from './routes/auth.js';
 import userProgressRouter from './routes/userProgress.js';
+import adminBooksRouter from './routes/adminBooks.js';
+import adminImportRouter from './routes/adminImport.js';
 import errorHandler from './middlewares/errorHandler.js';
 
 const app = express();
@@ -26,6 +28,8 @@ app.use('/content', express.static(contentRoot));
 app.use('/api/books', booksRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/users/me/progress', userProgressRouter);
+app.use('/api/admin/books', adminBooksRouter);
+app.use('/api/admin/import', adminImportRouter);
 
 // Error handler (last)
 app.use(errorHandler);

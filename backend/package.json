@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "seed": "node scripts/seedBooks.js",
+    "ingest:books": "node scripts/seedBooks.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

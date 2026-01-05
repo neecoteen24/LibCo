@@ -4,6 +4,15 @@ import fs from 'fs/promises';
 import { connectDB } from '../config/db.js';
 import Book from '../models/Books.js';
 
+// Optional: pass Gutenberg IDs as CLI args to import only specific books.
+// Example: npm run ingest:books -- 11 1237 50210
+const onlyIds = new Set(
+  process.argv
+    .slice(2)
+    .map((v) => Number(v))
+    .filter((v) => Number.isInteger(v) && v > 0)
+);
+
 async function seed() {
   await connectDB();
 
@@ -20,6 +29,9 @@ async function seed() {
     const meta = JSON.parse(text);
 
     const gutenberg_id = meta.gutenberg_id ?? meta.data?.id;
+
+    // If specific IDs were requested, skip others
+    if (onlyIds.size && !onlyIds.has(Number(gutenberg_id))) continue;
     const bookContentBase = path.join(contentDir, String(gutenberg_id));
 
     // Normalize data shape for our Mongoose schema
@@ -74,7 +86,7 @@ async function seed() {
     inserted++;
   }
 
-  console.log(`Seed complete. Upserted ${inserted} books.`);
+  console.log(`Seed complete. Upserted ${inserted} books.${onlyIds.size ? ` (filtered by IDs: ${[...onlyIds].join(', ')})` : ''}`);
   process.exit(0);
 }
 

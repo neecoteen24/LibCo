@@ -10,6 +10,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ReadingHistory from './pages/ReadingHistory';
 import Profile from './pages/Profile';
+import AdminBooks from './pages/AdminBooks';
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -30,6 +31,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/history" element={<ReadingHistory />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/admin/books" element={<AdminBooks />} />
       </Routes>
       <Footer />
     </div>

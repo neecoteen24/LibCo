@@ -158,6 +158,19 @@ function HomeNavbar({ onSearchSubmit, initialQuery = '' }) {
                       <i className="bi bi-person me-2"></i>
                       Your profile
                     </button>
+                    {user.role === 'admin' && (
+                      <button
+                        type="button"
+                        className="nav-profile-item"
+                        onClick={() => {
+                          setProfileOpen(false);
+                          navigate('/admin/books');
+                        }}
+                      >
+                        <i className="bi bi-gear me-2"></i>
+                        Admin panel
+                      </button>
+                    )}
                     <button
                       type="button"
                       className="nav-profile-item"
