@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
+import '../styles/TextReader.css';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 function TextReader() {
@@ -97,8 +99,16 @@ function TextReader() {
     classic: {
       label: 'Classic serif',
       fontFamily: '"Georgia", "Times New Roman", serif',
-      backgroundColor: '#f4e7d0',
-      textColor: '#3b2a1a',
+      // lively warm paper palette
+      backgroundColor: '#7be28f',
+      textColor: '#2b160b',
+    },
+    georgia: {
+      label: 'Georgia',
+      fontFamily: '"Georgia", "Times New Roman", serif',
+      // match classic but distinct name
+      backgroundColor: '#fff8ed',
+      textColor: '#2b160b',
     },
     typewriter: {
       label: 'Typewriter',
@@ -111,6 +121,10 @@ function TextReader() {
       fontFamily: '"Palatino Linotype", "Book Antiqua", serif',
       backgroundColor: '#23170f',
       textColor: '#f6ead4',
+    },
+    paper: {
+      label: 'Aged paper',
+      fontFamily: '"Palatino Linotype", "Book Antiqua", serif',
     },
   };
 
@@ -161,16 +175,34 @@ function TextReader() {
             </div>
 
             <div
-              className="p-4 shadow rounded"
+              className={
+                'p-4 shadow rounded ' +
+                (presetKey === 'paper'
+                  ? 'reader-paper'
+                  : presetKey === 'georgia'
+                  ? 'reader-georgia reader-serif-theme'
+                  : presetKey === 'classic'
+                  ? 'reader-serif reader-serif-theme'
+                  : presetKey === 'typewriter'
+                  ? 'reader-mono'
+                  : presetKey === 'nightSepia'
+                  ? 'reader-serif reader-nightsepia'
+                  : 'reader-sans')
+                }
+
               style={{
                 maxWidth: '48rem',
                 margin: '0 auto',
                 lineHeight: 1.7,
                 fontSize: '1.08rem',
                 whiteSpace: 'pre-wrap',
-                fontFamily: currentPreset.fontFamily,
-                backgroundColor: currentPreset.backgroundColor,
-                color: currentPreset.textColor,
+                // let the CSS theme handle background/color for serif presets
+                ...(presetKey === 'classic' || presetKey === 'georgia' || presetKey === 'paper'
+                ? {}
+                : {
+                    backgroundColor: currentPreset.backgroundColor,
+                    color: currentPreset.textColor,
+                  }),
                 boxShadow:
                   '0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.35)',
               }}

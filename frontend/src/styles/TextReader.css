@@ -1,0 +1,24 @@
+.reader-paper {
+  position: relative;
+  background-color: #f6eddc;
+  color: #2b160b;
+  overflow: hidden;
+}
+
+.reader-paper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  background-image: url("/textures/paper-noise.svg");
+  background-size: 180px 180px;
+  opacity: 0.9;
+  mix-blend-mode: multiply;
+}
+
+.reader-paper > * {
+  position: relative;
+  z-index: 1;
+}
