@@ -1,6 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
   <filter id="paperNoise">
-    <!-- Fine grain -->
     <feTurbulence
       type="fractalNoise"
       baseFrequency="1.6"
@@ -8,7 +8,6 @@
       seed="3"
       result="fine" />
 
-    <!-- Larger fiber variation -->
     <feTurbulence
       type="fractalNoise"
       baseFrequency="0.35"
@@ -16,17 +15,17 @@
       seed="8"
       result="coarse" />
 
-    <!-- Blend both scales -->
     <feBlend in="fine" in2="coarse" mode="multiply" result="blend"/>
 
-    <!-- Boost contrast so grain is visible -->
+    <feColorMatrix type="saturate" values="0" />
+
     <feComponentTransfer>
-      <feFuncR type="gamma" amplitude="1.4" exponent="1.2"/>
-      <feFuncG type="gamma" amplitude="1.4" exponent="1.2"/>
-      <feFuncB type="gamma" amplitude="1.4" exponent="1.2"/>
-    </feComponentTransfer>
+      <feFuncR type="linear" slope="1.5" intercept="-0.25"/>
+      <feFuncG type="linear" slope="1.5" intercept="-0.25"/>
+      <feFuncB type="linear" slope="1.5" intercept="-0.25"/>
+      <feFuncA type="linear" slope="0.1"/> </feComponentTransfer>
   </filter>
 
-  <!-- Important: give the filter pixels to work with -->
-  <rect width="100%" height="100%" fill="#808080" filter="url(#paperNoise)"/>
+  <rect width="100%" height="100%" fill="white" />
+  <rect width="100%" height="100%" filter="url(#paperNoise)" />
 </svg>

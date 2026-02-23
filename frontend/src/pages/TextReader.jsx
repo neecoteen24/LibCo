@@ -23,7 +23,19 @@ function TextReader() {
           throw new Error(`Failed to fetch text: ${res.status}`);
         }
         const text = await res.text();
-        setContent(text);
+
+        // Process the text into paragraphs by splitting on double newlines, while trimming whitespace
+        // Removed hardcoded line breaks within paragraphs by replacing single newlines with spaces
+
+        const paragraphs = text
+        .replace(/\r\n/g, '\n')       // 1. Standardize line breaks
+        .split(/\n\s*\n/)             // 2. Split into paragraphs (double newline)
+        .map(p => p.replace(/\n/g, ' ')) // 3. NEW: Turn single newlines into spaces
+        .map(p => p.trim())           // 4. Clean up whitespace
+        .filter(p => p.length > 0);   // 5. Remove empty items
+
+        setContent(paragraphs);
+        
       } catch (err) {
         console.error(err);
         setError('Could not load this book text.');
@@ -123,9 +135,11 @@ function TextReader() {
       textColor: '#f6ead4',
     },
     paper: {
-      label: 'Aged paper',
-      fontFamily: '"Palatino Linotype", "Book Antiqua", serif',
-    },
+    label: 'Aged paper',
+    fontFamily: '"Palatino Linotype", "Book Antiqua", serif',
+    backgroundColor: '#fdfbf8', // Match your CSS base
+    textColor: '#2b160b',
+  },
   };
 
   const currentPreset = presets[presetKey] || presets.classic;
@@ -207,7 +221,16 @@ function TextReader() {
                   '0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.35)',
               }}
             >
-              {content}
+              {/* Replace {content} inside your reader div with this: */}
+              {Array.isArray(content) ? (
+                content.map((para, idx) => (
+                  <p key={idx} id={`para-${idx}`} className="reader-paragraph">
+                    {para}
+                  </p>
+                ))
+              ) : (
+                content
+              )}
             </div>
           </>
         )}
