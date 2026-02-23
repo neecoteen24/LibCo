@@ -9,6 +9,11 @@ Create `backend/.env`:
 ```
 PORT=4000
 MONGODB_URI=mongodb://localhost:27017/libraryco
+JWT_SECRET=dev_secret_change_me
+
+# Optional (for storing book files in Vercel Blob)
+# Create a Blob store in Vercel, then add the read-write token here.
+BLOB_READ_WRITE_TOKEN=...
 ```
 (You currently have a cloud URI; keep that if preferred.)
 
@@ -24,6 +29,19 @@ API runs at `http://localhost:4000`.
 Local book files served from `test/books/<id>`
 - Direct: `http://localhost:4000/content/<id>/index.html`
 - Via API: `GET /api/books/:id/content?file=index.html`
+
+If a book has Blob URLs saved in MongoDB (e.g. `content.txtUrl`, `content.epubUrl`),
+the shorthand endpoints below will redirect to those URLs instead of reading from disk.
+
+### Book download endpoints
+- `GET /api/books/:id/content/txt`
+- `GET /api/books/:id/content/epub`
+- `GET /api/books/:id/content/pdf`
+
+### Admin upload to Blob
+These endpoints require an admin JWT (`Authorization: Bearer <token>`) and a `multipart/form-data` body with field name `file`.
+- `POST /api/admin/books/:id/content/txt`
+- `POST /api/admin/books/:id/content/epub`
 
 ## Books API
 - `GET /api/books?q=&page=&limit=` — list/search

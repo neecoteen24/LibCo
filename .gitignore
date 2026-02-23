@@ -29,8 +29,8 @@ Thumbs.db
 
 # Large local Gutenberg-style data (do not push to GitHub)
 # Keep this data only on your machine; seed script can recreate DB from it.
-test/books/
-test/books_meta/
+/test/
+test/font/
 
 # One-off local helper scripts not needed on GitHub
 injectBooksViaApi.mjs

@@ -28,6 +28,19 @@ const ContentSchema = new mongoose.Schema({
   // filesystem base path for this book content (e.g., absolute path to test/books/11)
   basePath: { type: String, required: false },
   preferredFormat: { type: String, required: false },
+
+  // Optional: object storage (e.g., Vercel Blob) URLs for book content.
+  // When set, API endpoints can redirect to these URLs instead of reading from disk.
+  provider: { type: String, required: false },
+
+  txtUrl: { type: String, required: false },
+  txtPathname: { type: String, required: false },
+
+  epubUrl: { type: String, required: false },
+  epubPathname: { type: String, required: false },
+
+  pdfUrl: { type: String, required: false },
+  pdfPathname: { type: String, required: false },
 }, { _id: false });
 
 const BookSchema = new mongoose.Schema({

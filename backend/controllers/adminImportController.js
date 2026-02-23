@@ -2,8 +2,9 @@ import 'dotenv/config';
 import path from 'path';
 import fs from 'fs/promises';
 import Book from '../models/Books.js';
+import { put } from '@vercel/blob';
 
-function normalizeGutendexMeta(meta, contentBasePath) {
+function normalizeGutendexMeta(meta, content) {
   const gutenberg_id = meta.gutenberg_id ?? meta.id;
   const rawData = meta || {};
 
@@ -41,7 +42,7 @@ function normalizeGutendexMeta(meta, contentBasePath) {
     gutenberg_id,
     source: meta.source || 'gutendex',
     data: normalizedData,
-    content: { basePath: contentBasePath },
+    content,
   };
 }
 
@@ -53,12 +54,14 @@ async function downloadBookContent(formats, bookDir) {
 
   let textUrl = null;
   let htmlUrl = null;
+  let epubUrl = null;
 
   for (const [mime, url] of entries) {
     if (typeof url !== 'string') continue;
     const lower = mime.toLowerCase();
     if (!textUrl && lower.startsWith('text/plain')) textUrl = url;
     if (!htmlUrl && lower.startsWith('text/html')) htmlUrl = url;
+    if (!epubUrl && lower === 'application/epub+zip') epubUrl = url;
   }
 
   async function safeFetch(url) {
@@ -78,12 +81,80 @@ async function downloadBookContent(formats, bookDir) {
     }
   }
 
+  if (epubUrl) {
+    const buf = await safeFetch(epubUrl);
+    if (buf) {
+      await fs.writeFile(path.join(bookDir, 'book.epub'), buf);
+    }
+  }
+
   if (htmlUrl) {
     const buf = await safeFetch(htmlUrl);
     if (buf) {
       await fs.writeFile(path.join(bookDir, 'index.html'), buf);
     }
   }
+}
+
+async function uploadBookContentToBlob({ gutenbergId, formats }) {
+  const entries = Object.entries(formats || {});
+  if (!entries.length) return {};
+
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) {
+    // Not configured; caller should fall back to filesystem.
+    return {};
+  }
+
+  let textUrl = null;
+  let epubUrl = null;
+
+  for (const [mime, url] of entries) {
+    if (typeof url !== 'string') continue;
+    const lower = String(mime).toLowerCase();
+    if (!textUrl && lower.startsWith('text/plain')) textUrl = url;
+    if (!epubUrl && lower === 'application/epub+zip') epubUrl = url;
+  }
+
+  async function safeFetch(url) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      return Buffer.from(await res.arrayBuffer());
+    } catch {
+      return null;
+    }
+  }
+
+  const content = { provider: 'vercel-blob' };
+
+  if (textUrl) {
+    const buf = await safeFetch(textUrl);
+    if (buf) {
+      const blob = await put(`books/${gutenbergId}/book.txt`, buf, {
+        access: 'public',
+        addRandomSuffix: false,
+        contentType: 'text/plain; charset=utf-8',
+      });
+      content.txtUrl = blob.url;
+      content.txtPathname = blob.pathname;
+    }
+  }
+
+  if (epubUrl) {
+    const buf = await safeFetch(epubUrl);
+    if (buf) {
+      const blob = await put(`books/${gutenbergId}/book.epub`, buf, {
+        access: 'public',
+        addRandomSuffix: false,
+        contentType: 'application/epub+zip',
+      });
+      content.epubUrl = blob.url;
+      content.epubPathname = blob.pathname;
+    }
+  }
+
+  return content;
 }
 
 export async function importFromGutendex(req, res, next) {
@@ -100,12 +171,19 @@ export async function importFromGutendex(req, res, next) {
     }
     const meta = await resp.json();
 
-    const contentRoot = path.resolve(process.cwd(), '../test/books');
-    const bookDir = path.join(contentRoot, String(id));
+    const formats = meta.formats || meta.data?.formats || {};
 
-    await downloadBookContent(meta.formats || meta.data?.formats || {}, bookDir);
+    // If Blob is configured, prefer storing book content in object storage.
+    // Otherwise fall back to writing into test/books/<id> on disk.
+    let content = await uploadBookContentToBlob({ gutenbergId: id, formats });
+    if (!content || (!content.txtUrl && !content.epubUrl)) {
+      const contentRoot = path.resolve(process.cwd(), '../test/books');
+      const bookDir = path.join(contentRoot, String(id));
+      await downloadBookContent(formats, bookDir);
+      content = { basePath: bookDir };
+    }
 
-    const payload = normalizeGutendexMeta(meta, bookDir);
+    const payload = normalizeGutendexMeta(meta, content);
 
     const result = await Book.findOneAndUpdate(
       { gutenberg_id: payload.gutenberg_id },

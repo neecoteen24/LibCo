@@ -238,6 +238,27 @@ export async function getBookContent(req, res, next) {
 export async function getBookTxt(req, res, next) {
   try {
     const { id } = req.params;
+
+    // Prefer stored object-storage URL (e.g., Vercel Blob)
+    const book = await Book.findOne({ gutenberg_id: Number(id) });
+    if (book?.content?.txtUrl) {
+      return res.redirect(book.content.txtUrl);
+    }
+
+    // If a generic HTTP base URL is provided (e.g. GitHub raw), redirect there first
+    if (process.env.CONTENT_BASE_URL) {
+      const base = process.env.CONTENT_BASE_URL.replace(/\/$/, '');
+      const url = `${base}/${id}/book.txt`;
+      return res.redirect(url);
+    }
+
+    // Otherwise, if configured to use S3, redirect there
+    if (process.env.CONTENT_STORAGE === 's3' && process.env.S3_BASE_URL) {
+      const base = process.env.S3_BASE_URL.replace(/\/$/, '');
+      const url = `${base}/${id}/book.txt`;
+      return res.redirect(url);
+    }
+
     const contentRoot = path.resolve(process.cwd(), '../test/books');
     const abs = path.resolve(contentRoot, String(id), 'book.txt');
     await fs.access(abs);
@@ -250,6 +271,13 @@ export async function getBookTxt(req, res, next) {
 export async function getBookEpub(req, res, next) {
   try {
     const { id } = req.params;
+
+    // Prefer stored object-storage URL (e.g., Vercel Blob)
+    const book = await Book.findOne({ gutenberg_id: Number(id) });
+    if (book?.content?.epubUrl) {
+      return res.redirect(book.content.epubUrl);
+    }
+
     const contentRoot = path.resolve(process.cwd(), '../test/books');
     const abs = path.resolve(contentRoot, String(id), 'book.epub');
     await fs.access(abs);
