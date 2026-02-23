@@ -29,11 +29,31 @@ const corsOrigins = (process.env.CORS_ORIGINS
 	.map((s) => s.trim())
 	.filter(Boolean);
 
+// Allow Vercel preview URLs for this project by default.
+// Example: https://lib-xxxx-anurags-projects-72bf5c52.vercel.app
+const corsOriginRegexes = [];
+const regexEnv = process.env.CORS_ORIGIN_REGEXES;
+if (regexEnv) {
+	for (const raw of regexEnv.split(',')) {
+		const pattern = raw.trim();
+		if (!pattern) continue;
+		try {
+			corsOriginRegexes.push(new RegExp(pattern));
+		} catch {
+			// ignore invalid regex
+		}
+	}
+} else {
+	corsOriginRegexes.push(/^https:\/\/lib-.*\.vercel\.app$/);
+}
+
 app.use(	cors({
 		origin: (origin, callback) => {
 			// Allow non-browser clients (curl, server-to-server) that omit Origin.
 			if (!origin) return callback(null, true);
-			return callback(null, corsOrigins.includes(origin));
+			if (corsOrigins.includes(origin)) return callback(null, true);
+			if (corsOriginRegexes.some((re) => re.test(origin))) return callback(null, true);
+			return callback(null, false);
 		},
 		methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
 		allowedHeaders: ['Content-Type', 'Authorization'],
