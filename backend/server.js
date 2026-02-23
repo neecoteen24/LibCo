@@ -16,7 +16,29 @@ const app = express();
 connectDB();
 
 app.use(helmet());
-app.use(cors());
+
+const corsOrigins = (process.env.CORS_ORIGINS
+	? process.env.CORS_ORIGINS.split(',')
+	: [
+		// Production frontend
+		'https://lib-co.vercel.app',
+		// Local dev
+		'http://localhost:5173',
+		'http://localhost:3000',
+	])
+	.map((s) => s.trim())
+	.filter(Boolean);
+
+app.use(	cors({
+		origin: (origin, callback) => {
+			// Allow non-browser clients (curl, server-to-server) that omit Origin.
+			if (!origin) return callback(null, true);
+			return callback(null, corsOrigins.includes(origin));
+		},
+		methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+		allowedHeaders: ['Content-Type', 'Authorization'],
+	})
+);
 app.use(express.json({ limit: '2mb' }));
 app.use(morgan('dev'));
 
