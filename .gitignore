@@ -38,3 +38,4 @@ injectBooksViaApi.mjs
 # Misc
 *.tmp
 postman/
+.vercel

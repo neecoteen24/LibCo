@@ -20,6 +20,31 @@ app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(morgan('dev'));
 
+// Basic uptime endpoints (useful for Render / load balancer checks)
+app.head('/', (req, res) => {
+	res.status(200).end();
+});
+
+app.get('/', (req, res) => {
+	res.json({
+		ok: true,
+		name: 'LibraryCo API',
+		routes: {
+			books: '/api/books',
+			auth: '/api/auth',
+			me: '/api/auth/me',
+		},
+	});
+});
+
+app.head('/health', (req, res) => {
+	res.status(200).end();
+});
+
+app.get('/health', (req, res) => {
+	res.json({ ok: true });
+});
+
 // Serve local book contents (HTML/TXT/etc) from test/books
 const contentRoot = path.resolve(process.cwd(), '../test/books');
 app.use('/content', express.static(contentRoot));
