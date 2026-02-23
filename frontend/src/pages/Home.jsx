@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import BookCard from '../components/BookCard';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? 'http://localhost:4000' : '');
 
 function HorizontalShelf({ titleLine, heading, books }) {
   const scrollRef = useRef(null);

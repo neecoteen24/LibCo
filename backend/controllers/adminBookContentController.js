@@ -30,7 +30,7 @@ async function uploadToBlob({ gutenbergId, file, ext, contentTypeFallback }) {
 
   const pathname = `books/${gutenbergId}/book${ext}`;
 
-  const blob = await put(pathname, file.buffer, {
+    const blob = await put(pathname, file.buffer, {
     access: 'public',
     addRandomSuffix: false,
     contentType: file.mimetype || contentTypeFallback,

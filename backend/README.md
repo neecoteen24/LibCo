@@ -33,6 +33,9 @@ Local book files served from `test/books/<id>`
 If a book has Blob URLs saved in MongoDB (e.g. `content.txtUrl`, `content.epubUrl`),
 the shorthand endpoints below will redirect to those URLs instead of reading from disk.
 
+Note: this project currently uploads blobs with `access: "public"`, so your Blob store
+must be configured for public access in Vercel.
+
 ### Book download endpoints
 - `GET /api/books/:id/content/txt`
 - `GET /api/books/:id/content/epub`
@@ -42,6 +45,25 @@ the shorthand endpoints below will redirect to those URLs instead of reading fro
 These endpoints require an admin JWT (`Authorization: Bearer <token>`) and a `multipart/form-data` body with field name `file`.
 - `POST /api/admin/books/:id/content/txt`
 - `POST /api/admin/books/:id/content/epub`
+
+### Bulk push `test/books/*` to Blob
+If you already have book files on disk under `test/books/<id>/book.txt` and/or `book.epub`, you can upload them all to Vercel Blob and update MongoDB URLs:
+```
+cd backend
+
+# Optional: preview what folders contain content
+npm run push-test-books-to-blob -- --dry-run --limit 5
+
+# Upload everything (skips books that already have Blob URLs in Mongo)
+npm run push-test-books-to-blob
+
+# Force re-upload (overwrites the Blob objects and Mongo URLs)
+npm run push-test-books-to-blob -- --force
+```
+
+Notes:
+- Requires `MONGODB_URI` and `BLOB_READ_WRITE_TOKEN` in `backend/.env`.
+- Uses `access: "public"` and paths like `books/<id>/book.txt`.
 
 ## Books API
 - `GET /api/books?q=&page=&limit=` — list/search

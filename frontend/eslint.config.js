@@ -24,6 +24,13 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+
+      // Context modules commonly export hooks (e.g. useAuth) in addition to providers.
+      // Allow these named exports while keeping Fast Refresh protections.
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true, allowExportNames: ['useAuth'] },
+      ],
     },
   },
 ])

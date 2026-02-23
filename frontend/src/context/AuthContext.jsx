@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? 'http://localhost:4000' : '');
 
 const AuthContext = createContext(null);
 
@@ -53,7 +53,11 @@ export function AuthProvider({ children }) {
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      throw new Error(body.error || 'Login failed');
+      const msg =
+        body.error ||
+        (Array.isArray(body.errors) && body.errors[0]?.msg) ||
+        'Login failed';
+      throw new Error(msg);
     }
     const json = await res.json();
     saveAuth(json.token, json.user);
@@ -68,7 +72,11 @@ export function AuthProvider({ children }) {
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      throw new Error(body.error || 'Registration failed');
+      const msg =
+        body.error ||
+        (Array.isArray(body.errors) && body.errors[0]?.msg) ||
+        'Registration failed';
+      throw new Error(msg);
     }
     const json = await res.json();
     saveAuth(json.token, json.user);
