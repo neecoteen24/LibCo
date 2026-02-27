@@ -6,6 +6,8 @@ import '../styles/TextReader.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
+
+
 function TextReader() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -145,10 +147,30 @@ function TextReader() {
   const currentPreset = presets[presetKey] || presets.classic;
 
   return (
+
+    
+
     <main
       className="flex-grow-1"
       style={{ background: 'radial-gradient(circle at top, #14151d 0, #050608 55%)' }}
     >
+
+      <svg width="0" height="0" style={{ position: 'absolute' }}>
+        <filter id="paperNoise">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.8"
+            numOctaves="4"
+            stitchTiles="stitch"
+          />
+          <feColorMatrix type="saturate" values="0" />
+          <feComponentTransfer>
+            <feFuncA type="table" tableValues="0 0.06" />
+          </feComponentTransfer>
+          <feGaussianBlur stdDeviation="0.4" />
+        </filter>
+      </svg>
+
       <div className="container-fluid py-3 border-bottom bg-dark text-light">
         <div className="d-flex justify-content-between align-items-center">
           <button

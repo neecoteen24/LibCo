@@ -1,40 +1,25 @@
 .reader-paper {
   position: relative;
-  /* The "Cream" Base Color */
-  background-color: #fdfbf8; 
+  background-color: #f6f1e6;
   color: #2b160b;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  isolation: isolate;
+  box-shadow:
+    inset 0 0 40px rgba(0, 0, 0, 0.03),
+    0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .reader-paper::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   pointer-events: none;
-  z-index: 1; /* Sits above background, below text */
+  z-index: 1;
 
-  /* Point to your new SVG file */
-  background-image: url("/textures/paper-noise.svg");
-  background-repeat: repeat;
-  background-size: 300px 300px;
-  
-  /* Multiply allows the grain to darken the cream base naturally */
-  mix-blend-mode: multiply; 
-  opacity: 0.5; 
-}
+  background: white;
+  filter: url(#paperNoise);
+  opacity: 0.4;
 
-/* Ensure the text stays above the texture for maximum clarity */
-.reader-paper {
-  position: relative;
-  z-index: 0;
-}
-
-/* If the content is raw text, it might not have child tags, 
-   so we ensure the text node itself is treated correctly. */
-.reader-paper {
-  isolation: isolate;
+  mix-blend-mode: multiply;
 }
